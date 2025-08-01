@@ -38,4 +38,16 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// @route   GET /registrations
+router.get('/stats', async (req, res) => {
+  try {
+    const registrations = await Registration.findAll();
+    res.status(200).json(registrations);
+  } catch (error) {
+    console.error('Error fetching registrations:', error);
+    res.status(500).json({ message: 'Server error while fetching registrations.' });
+  }
+});
+
+
 module.exports = router;

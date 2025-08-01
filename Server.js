@@ -5,7 +5,7 @@ require('dotenv').config();
 const db = require('./config/db');
 
 const registrationRoutes = require('./Routes/registrationRoutes');
-const adminRoutes = require('./Routes/registrationRoutes');
+const adminRoutes = require('./Routes/adminRoutes');
 
 const app = express();
 const port = process.env.PORT || 5000;

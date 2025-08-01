@@ -1,7 +1,5 @@
-const mysql = require('mysql2')
-require('mysql2/promise');
+const mysql = require('mysql2/promise'); 
 require('dotenv').config();
-const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -13,5 +11,8 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// ✅ Use .promise() so that db.query returns a Promise
-module.exports = pool;
+module.exports = {
+  pool,
+  query: (...args) => pool.query(...args),
+  getConnection: () => pool.getConnection(),
+};

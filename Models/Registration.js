@@ -6,7 +6,7 @@ class Registration {
   static async create({ name, phone, mpesa_code, event_date }) {
     const token = `TKT-${uuidv4().substring(0, 8).toUpperCase()}`;
 
-    const [result] = await db.pool.query(
+    const [result] = await db.query(
       `INSERT INTO registrations (name, phone, mpesa_code, event_date, token)
        VALUES (?, ?, ?, ?, ?)`,
       [name, phone, mpesa_code, event_date, token]
@@ -21,28 +21,25 @@ class Registration {
       token,
     };
   }
-
-  // Find registration by phone number
+// Find a registration by phone number
   static async findByPhone(phone) {
-    const [rows] = await db.pool.query(
+    const [rows] = await db.query(
       `SELECT * FROM registrations WHERE phone = ?`,
       [phone]
     );
-    return rows[0]; // Return first match or undefined
+    return rows[0];
   }
-
-  // Get a registration by ID
+// Find a registration by ID
   static async findById(id) {
-    const [rows] = await db.pool.query(
+    const [rows] = await db.query(
       `SELECT * FROM registrations WHERE id = ?`,
       [id]
     );
-    return rows[0]; // Return one object
+    return rows[0];
   }
-
-  // Update registration by ID
+// Update a registration by ID and return the updated record
   static async update(id, { name, phone, mpesa_code, event_date }) {
-    const [result] = await db.pool.query(
+    const [result] = await db.query(
       `UPDATE registrations 
        SET name = ?, phone = ?, mpesa_code = ?, event_date = ?
        WHERE id = ?`,
@@ -51,7 +48,12 @@ class Registration {
 
     if (result.affectedRows === 0) return null;
 
-    return this.findById(id); // Return the updated record
+    return this.findById(id);
+  }
+  //find all registrations
+  static async findAll() {
+    const [rows] = await db.query(`SELECT * FROM registrations ORDER BY created_at DESC`);
+    return rows;
   }
 }
 

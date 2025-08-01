@@ -1,22 +1,23 @@
-const db = require('../config/db'); // Make sure this exports pool.promise
+const db = require('../config/db');
 
 // Create a new registration
 const createRegistration = async (req, res) => {
   try {
     const { name, phone, mpesa_code, event_date } = req.body;
 
+    // Validate required fields
     if (!name || !phone || !mpesa_code || !event_date) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Check for valid date
-    if (isNaN(Date.parse(event_date))) {
+    const parsedDate = new Date(event_date);
+    if (isNaN(parsedDate.getTime())) {
       return res.status(400).json({ message: 'Invalid event date format' });
     }
 
-    // Check if phone already exists
+    // Check if phone already registered
     const [existing] = await db.query(
-      'SELECT * FROM registration WHERE phone = ?',
+      'SELECT * FROM registrations WHERE phone = ?',
       [phone]
     );
 
@@ -29,37 +30,36 @@ const createRegistration = async (req, res) => {
 
     // Insert registration
     const [result] = await db.query(
-      'INSERT INTO registration (name, phone, mpesa_code, event_date) VALUES (?, ?, ?, ?)',
-      [name, phone, mpesa_code, new Date(event_date)]
+      'INSERT INTO registrations (name, phone, mpesa_code, event_date) VALUES (?, ?, ?, ?)',
+      [name, phone, mpesa_code, parsedDate]
     );
 
-    // Fetch newly inserted record
+    // Fetch inserted record
     const [newRecord] = await db.query(
-      'SELECT * FROM registration WHERE id = ?',
+      'SELECT * FROM registrations WHERE id = ?',
       [result.insertId]
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Registration successful',
       data: newRecord[0],
     });
   } catch (error) {
     console.error('Create Registration Error:', error.message);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
-
 
 // Get all registrations
 const getAllRegistrations = async (req, res) => {
   try {
     const [registrations] = await db.query(
-      'SELECT * FROM registration ORDER BY created_at DESC'
+      'SELECT * FROM registrations ORDER BY created_at DESC'
     );
-    res.status(200).json({ data: registrations });
+    return res.status(200).json({ data: registrations });
   } catch (error) {
     console.error('Get All Registrations Error:', error.message);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -69,7 +69,7 @@ const getRegistrationById = async (req, res) => {
     const { id } = req.params;
 
     const [rows] = await db.query(
-      'SELECT * FROM registration WHERE id = ?',
+      'SELECT * FROM registrations WHERE id = ?',
       [id]
     );
 
@@ -77,10 +77,10 @@ const getRegistrationById = async (req, res) => {
       return res.status(404).json({ message: 'Registration not found' });
     }
 
-    res.status(200).json({ data: rows[0] });
+    return res.status(200).json({ data: rows[0] });
   } catch (error) {
     console.error('Get Registration By ID Error:', error.message);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -90,27 +90,32 @@ const updateRegistration = async (req, res) => {
     const { id } = req.params;
     const { name, phone, mpesa_code, event_date } = req.body;
 
+    const parsedDate = new Date(event_date);
+    if (isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ message: 'Invalid event date format' });
+    }
+
     const [result] = await db.query(
-      'UPDATE registration SET name = ?, phone = ?, mpesa_code = ?, event_date = ? WHERE id = ?',
-      [name, phone, mpesa_code, new Date(event_date), id]
+      'UPDATE registrations SET name = ?, phone = ?, mpesa_code = ?, event_date = ? WHERE id = ?',
+      [name, phone, mpesa_code, parsedDate, id]
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Registration not found or not updated' });
+      return res.status(404).json({ message: 'Registration not found or unchanged' });
     }
 
     const [updated] = await db.query(
-      'SELECT * FROM registration WHERE id = ?',
+      'SELECT * FROM registrations WHERE id = ?',
       [id]
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Registration updated',
       data: updated[0],
     });
   } catch (error) {
     console.error('Update Registration Error:', error.message);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 

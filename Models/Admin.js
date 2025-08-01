@@ -7,7 +7,7 @@ class Admin {
   static async create({ username, password }) {
     const password_hash = await bcrypt.hash(password, 10); // Securely hash password
 
-    const [result] = await db.pool.query(
+    const [result] = await db.query(
       `INSERT INTO admins (username, password_hash) VALUES (?, ?)`,
       [username, password_hash]
     );
@@ -21,7 +21,7 @@ class Admin {
 
   // Find an admin by username
   static async findByUsername(username) {
-    const [rows] = await db.pool.query(
+    const [rows] = await db.query(
       `SELECT * FROM admins WHERE username = ?`,
       [username]
     );
@@ -31,7 +31,7 @@ class Admin {
 
   // Find admin by ID
   static async findById(id) {
-    const [rows] = await db.pool.query(
+    const [rows] = await db.query(
       `SELECT * FROM admins WHERE id = ?`,
       [id]
     );

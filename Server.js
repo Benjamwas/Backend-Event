@@ -14,9 +14,23 @@ const port = process.env.PORT || 5003;
 const server = http.createServer(app);
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://event-booking-fe.vercel.app'
+];
+
+
 app.use(cors({
-    origin: 'http://localhost:5173, https://event-booking-fe.vercel.app/',
-    credentials: true
+  origin: function (origin, callback) {
+    // allow requests with no origin like mobile apps or curl
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // if you're using cookies or Authorization headers
 }));
 app.use(express.json());
 

@@ -7,6 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET_KEY;
 
 const loginAdmin = async (req, res) => {
   try {
+    console.log("req body",req.body);
     const { username, password } = req.body;
 
     // Check if all fields are provided

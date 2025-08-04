@@ -8,14 +8,14 @@ const registrationRoutes = require('./Routes/registrationRoutes');
 const adminRoutes = require('./Routes/adminRoutes');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5003;
 
 // Create HTTP server
 const server = http.createServer(app);
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5173, https://event-booking-fe.vercel.app/',
     credentials: true
 }));
 app.use(express.json());
